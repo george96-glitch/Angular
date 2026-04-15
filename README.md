@@ -36,7 +36,7 @@ A modern, feature-rich **Student Portal** built with Angular that provides a com
 ### Dashboard Overview
 ![Dashboard](https://raw.githubusercontent.com/george96-glitch/Angular/main/src/app/assets/images/Dashboardpage.png)
 
-*Note: Add your actual dashboard screenshot URL above*
+
 
 ## 🛠️ Technology Stack
 
