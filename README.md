@@ -4,7 +4,7 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 Screenshots of Login Page:
 
-![Login](https://raw.githubusercontent.com/george96-glitch/assets/images/Loginpage.png)
+![Login](https://raw.githubusercontent.com/george96-glitch/src/app/assets/images/Loginpage.png)
 
 ## Development server
 
