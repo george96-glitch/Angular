@@ -1,5 +1,243 @@
-<h2>Dashboard</h2>
+<!-- dashboard.html -->
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">📚</div>
+      <h2>LearnerHub</h2>
+    </div>
+    
+    <nav class="nav-menu">
+      <a href="#" class="nav-item active">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📚</span>
+        <span>My Courses</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📝</span>
+        <span>Assignments</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🎓</span>
+        <span>Certificates</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">💬</span>
+        <span>Discussions</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        <span>Settings</span>
+      </a>
+    </nav>
+  </aside>
 
-<p>Welcome {{ user?.email }}</p>
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-btn">☰</button>
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            placeholder="Search courses, activities..." 
+            [(ngModel)]="searchQuery"
+            (input)="getFilteredActivities()"
+          />
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <div class="notifications" (click)="toggleNotifications()">
+          <span class="notification-icon">🔔</span>
+          <span class="notification-badge" *ngIf="notifications.filter(n => !n.read).length > 0">
+            {{ notifications.filter(n => !n.read).length }}
+          </span>
+          <div class="notifications-dropdown" *ngIf="showNotifications">
+            <div class="dropdown-header">
+              <h4>Notifications</h4>
+              <button class="mark-all">Mark all read</button>
+            </div>
+            <div class="notifications-list">
+              <div *ngFor="let notification of notifications" 
+                   class="notification-item" 
+                   [class.unread]="!notification.read"
+                   (click)="markNotificationAsRead(notification)">
+                <p>{{ notification.message }}</p>
+                <small>{{ notification.time }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="user-menu" (click)="toggleUserMenu()">
+          <div class="user-avatar">
+            {{ user?.email?.charAt(0)?.toUpperCase() || 'U' }}
+          </div>
+          <span class="user-name">{{ user?.email?.split('@')[0] || 'User' }}</span>
+          <div class="user-dropdown" *ngIf="showUserMenu">
+            <a href="#">Profile</a>
+            <a href="#">Settings</a>
+            <a href="#">Help</a>
+            <hr />
+            <a href="#" (click)="logout(); $event.preventDefault()">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
 
-<button (click)="logout()">Logout</button>
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h1>{{ greeting }}, {{ user?.email?.split('@')[0] || 'Learner' }}! 👋</h1>
+      <p>Ready to continue your learning journey? You're making great progress!</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-info">
+          <h3>{{ stats.totalCourses }}</h3>
+          <p>Total Courses</p>
+        </div>
+        <div class="stat-change positive">+2 this month</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <h3>{{ stats.completedCourses }}</h3>
+          <p>Completed</p>
+        </div>
+        <div class="stat-change positive">{{ (stats.completedCourses / stats.totalCourses * 100).toFixed(0) }}% complete</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <h3>{{ stats.averageScore }}%</h3>
+          <p>Average Score</p>
+        </div>
+        <div class="stat-change positive">+5% improvement</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🎓</div>
+        <div class="stat-info">
+          <h3>{{ stats.certificates }}</h3>
+          <p>Certificates</p>
+        </div>
+        <div class="stat-change">Keep going!</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+      <!-- My Courses Section -->
+      <div class="card courses-section">
+        <div class="card-header">
+          <h2>My Courses</h2>
+          <div class="filter-buttons">
+            <button [class.active]="selectedFilter === 'all'" (click)="selectedFilter = 'all'">All</button>
+            <button [class.active]="selectedFilter === 'in-progress'" (click)="selectedFilter = 'in-progress'">In Progress</button>
+            <button [class.active]="selectedFilter === 'completed'" (click)="selectedFilter = 'completed'">Completed</button>
+          </div>
+        </div>
+        
+        <div class="courses-list">
+          <div *ngFor="let course of getFilteredCourses()" class="course-item">
+            <div class="course-icon" [style.background]="course.color + '20'" [style.color]="course.color">
+              {{ course.icon }}
+            </div>
+            <div class="course-info">
+              <h4>{{ course.name }}</h4>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width]="course.progress + '%'" 
+                     [style.background]="getProgressColor(course.progress)"></div>
+              </div>
+              <span class="progress-text">{{ course.progress }}% Complete</span>
+            </div>
+            <button class="continue-btn" (click)="continueCourse(course)">
+              {{ course.progress === 100 ? 'Review' : course.progress === 0 ? 'Start' : 'Continue' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card activity-section">
+        <div class="card-header">
+          <h2>Recent Activity</h2>
+          <a href="#" class="view-all">View All →</a>
+        </div>
+        
+        <div class="activity-timeline">
+          <div *ngFor="let activity of getFilteredActivities()" class="activity-item">
+            <div class="activity-icon" [class.completed]="activity.type === 'completed'"
+                 [class.certificate]="activity.type === 'certificate'"
+                 [class.started]="activity.type === 'started'">
+              {{ activity.type === 'completed' ? '✓' : activity.type === 'certificate' ? '🏆' : '▶️' }}
+            </div>
+            <div class="activity-details">
+              <h4>{{ activity.title }}</h4>
+              <p>{{ activity.date }}</p>
+            </div>
+            <div class="activity-score" *ngIf="activity.score">
+              Score: {{ activity.score }}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Tasks -->
+      <div class="card tasks-section">
+        <div class="card-header">
+          <h2>Upcoming Tasks</h2>
+          <a href="#" class="view-all">View All →</a>
+        </div>
+        
+        <div class="tasks-list">
+          <div *ngFor="let task of upcomingTasks" class="task-item">
+            <div class="task-priority" [style.background]="getPriorityColor(task.priority)"></div>
+            <div class="task-info">
+              <h4>{{ task.task }}</h4>
+              <p>Due: {{ task.dueDate }}</p>
+            </div>
+            <button class="task-action">Start</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card quick-actions">
+        <div class="card-header">
+          <h2>Quick Actions</h2>
+        </div>
+        
+        <div class="actions-grid">
+          <button class="action-btn">
+            <span>📖</span>
+            <span>Browse Courses</span>
+          </button>
+          <button class="action-btn">
+            <span>📝</span>
+            <span>Take Quiz</span>
+          </button>
+          <button class="action-btn">
+            <span>💬</span>
+            <span>Join Discussion</span>
+          </button>
+          <button class="action-btn">
+            <span>🏆</span>
+            <span>View Achievements</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

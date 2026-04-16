@@ -11,7 +11,7 @@ describe('LoginComponent', () => {
 
   beforeEach(async () => {
     mockRouter = {
-      navigate: jasmine.createSpy('navigate')
+      navigate: vi.fn() // Use vi.fn() instead of jasmine.createSpy
     };
 
     await TestBed.configureTestingModule({
@@ -45,10 +45,33 @@ describe('LoginComponent', () => {
   });
 
   it('should toggle password visibility', () => {
-    expect(component.showPassword).toBeFalse();
+    expect(component.showPassword).toBe(false);
     component.togglePasswordVisibility();
-    expect(component.showPassword).toBeTrue();
+    expect(component.showPassword).toBe(true);
     component.togglePasswordVisibility();
-    expect(component.showPassword).toBeFalse();
+    expect(component.showPassword).toBe(false);
+  });
+
+  it('should successfully login with valid credentials', () => {
+    // Create a test user
+    const testUser = { email: 'test@example.com', password: 'password123' };
+    localStorage.setItem('users', JSON.stringify([testUser]));
+    
+    component.email = 'test@example.com';
+    component.password = 'password123';
+    component.login();
+    
+    // Check if logged in user is stored
+    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+    expect(loggedInUser).toBeTruthy();
+    expect(loggedInUser.email).toBe('test@example.com');
+  });
+
+  it('should show error for invalid credentials', () => {
+    component.email = 'wrong@example.com';
+    component.password = 'wrongpassword';
+    component.login();
+    
+    expect(component.errorMessage).toBe('Invalid email or password');
   });
 });
